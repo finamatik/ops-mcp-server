@@ -1,0 +1,6 @@
+__pycache__/
+.pytest_cache/
+out/*.pdf
+out/*.png
+audit.jsonl
+data/ops.db

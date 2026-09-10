@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "ops-mcp": {
+      "command": "python3",
+      "args": ["server.py"],
+      "env": { "OPS_MCP_READ_ONLY": "0" }
+    }
+  }
+}
