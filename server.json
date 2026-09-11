@@ -1,0 +1,22 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-09-29/server.schema.json",
+  "name": "io.github.finamatik/ops-mcp-server",
+  "description": "Ten audited tools over contacts, deals, tasks, inventory and sales orders, with read only mode, dry run orders and an audit log. SQLite backend swappable for any CRM or ERP.",
+  "repository": {
+    "url": "https://github.com/finamatik/ops-mcp-server",
+    "source": "github"
+  },
+  "version": "0.1.0",
+  "packages": [
+    {
+      "registryType": "pypi",
+      "identifier": "finamatik-ops-mcp",
+      "version": "0.1.0",
+      "transport": { "type": "stdio" },
+      "environmentVariables": [
+        { "name": "OPS_MCP_READ_ONLY", "description": "Set to 1 to hide the write tools", "isRequired": false, "isSecret": false },
+        { "name": "OPS_MCP_HOME", "description": "Folder for ops.db and audit.jsonl (default ~/.finamatik-ops-mcp)", "isRequired": false, "isSecret": false }
+      ]
+    }
+  ]
+}

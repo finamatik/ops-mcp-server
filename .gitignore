@@ -4,3 +4,6 @@ out/*.pdf
 out/*.png
 audit.jsonl
 data/ops.db
+dist/
+build/
+*.egg-info/

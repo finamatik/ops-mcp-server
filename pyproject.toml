@@ -1,0 +1,42 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "finamatik-ops-mcp"
+version = "0.1.0"
+description = "MCP server with ten audited tools over contacts, deals, tasks, inventory and sales orders, with read only mode, dry run orders and an audit log. SQLite backend swappable for any CRM or ERP."
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.10"
+authors = [{ name = "Finamatik Business Solutions FZE LLC", email = "info@finamatik.com" }]
+keywords = ["mcp", "model-context-protocol", "claude", "crm", "erp", "operations", "automation", "finance"]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Topic :: Office/Business",
+  "Topic :: Software Development :: Libraries",
+]
+dependencies = ["mcp>=1.27,<2"]
+
+[project.optional-dependencies]
+test = ["pytest>=8"]
+
+[project.urls]
+Homepage = "https://finamatik.com/work/ops-mcp-server"
+Repository = "https://github.com/finamatik/ops-mcp-server"
+Issues = "https://github.com/finamatik/ops-mcp-server/issues"
+Company = "https://finamatik.com"
+
+[project.scripts]
+finamatik-ops-mcp = "finamatik_ops_mcp.server:main"
+
+[tool.setuptools]
+packages = ["finamatik_ops_mcp"]

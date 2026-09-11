@@ -17,27 +17,42 @@ An MCP server (Python, official `mcp` SDK, FastMCP) that lets Claude Desktop, Cl
 
 Safety model: tool annotations (`readOnlyHint`, `destructiveHint`, `idempotentHint`) so clients can ask before writes; `OPS_MCP_READ_ONLY=1` removes the write tools from the tool list entirely; every call is appended to `audit.jsonl` (timestamp, tool, arguments, ok or error, duration); validation errors come back as MCP tool errors the model can act on.
 
-## Run
+## Install and run
 
 ```
-pip install "mcp>=1.27" pytest
-python3 server.py                       # stdio, what Claude Desktop uses; seeds sample data on first start
-python3 -m pytest tests -q              # 6 end to end tests through a real MCP client
-npx @modelcontextprotocol/inspector --config inspector.config.json --server ops-mcp
+pip install finamatik-ops-mcp
+finamatik-ops-mcp                        # stdio, what Claude Desktop uses; seeds sample data on first start
+OPS_MCP_READ_ONLY=1 finamatik-ops-mcp    # read only: the write tools are not registered at all
 ```
+
+Data lives in `~/.finamatik-ops-mcp/` (`ops.db` and `audit.jsonl`). Move it with `OPS_MCP_HOME`, or point at specific files with `OPS_MCP_DB` and `OPS_MCP_AUDIT`.
 
 Claude Desktop, `claude_desktop_config.json`:
 
 ```json
-{ "mcpServers": { "ops-mcp": { "command": "python3", "args": ["/absolute/path/ops-mcp-server/server.py"], "env": { "OPS_MCP_READ_ONLY": "0" } } } }
+{ "mcpServers": { "ops-mcp": { "command": "finamatik-ops-mcp", "env": { "OPS_MCP_READ_ONLY": "0" } } } }
 ```
 
-Claude Code: `claude mcp add ops-mcp -- python3 /absolute/path/ops-mcp-server/server.py`
+Claude Code: `claude mcp add ops-mcp -- finamatik-ops-mcp`
 
-Remote: `OPS_MCP_TRANSPORT=streamable-http python3 server.py` serves `/mcp` on port 8000; put authentication in front of it.
+Remote: `OPS_MCP_TRANSPORT=streamable-http finamatik-ops-mcp` serves `/mcp` on port 8000; put authentication in front of it.
+
+From source:
+
+```
+git clone https://github.com/finamatik/ops-mcp-server && cd ops-mcp-server
+pip install -e ".[test]"
+python3 server.py                       # same server, run from the checkout
+python3 -m pytest tests -q              # 6 end to end tests through a real MCP client
+npx @modelcontextprotocol/inspector --config inspector.config.json --server ops-mcp
+```
+
+Requires Python 3.10 or later and the official `mcp` SDK 1.27 or later (pinned below 2.0; the 2.x SDK renamed FastMCP).
 
 ## Files
 
-`server.py` tools, resources and prompt. `backend.py` data layer and sample seed (40 contacts, 25 deals, 30 tasks, 10 SKUs, 20 orders). `tests/test_server.py`. `inspector.config.json`. `audit.jsonl` is created on the first call.
+`finamatik_ops_mcp/server.py` tools, resources, prompt and the `main()` entry point. `finamatik_ops_mcp/backend.py` data layer and sample seed (40 contacts, 25 deals, 30 tasks, 10 SKUs, 20 orders). `server.py` and `backend.py` at the root are thin shims so `python3 server.py` still works from a checkout. `tests/test_server.py`. `inspector.config.json`. `server.json` is the MCP registry manifest. `.github/workflows/publish.yml` publishes a GitHub release to PyPI with trusted publishing.
+
+<!-- mcp-name: io.github.finamatik/ops-mcp-server -->
 
 MIT licence, copyright Finamatik Business Solutions FZE LLC. Questions and production use: info@finamatik.com.
