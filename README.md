@@ -1,6 +1,6 @@
 # Ops MCP server
 
-An MCP server (Python, official `mcp` SDK, FastMCP) that lets Claude Desktop, Claude Code or any MCP client work with a company's operations data through ten typed, audited tools over contacts, deals, tasks, notes, inventory and sales orders, plus three resources and a briefing prompt. Built and tested on sample data by [Finamatik](https://finamatik.com/work/ops-mcp-server). The SQLite backend is one class (`backend.py`) and is the only thing to swap for a real CRM, ERP or project system.
+An MCP server (Python, official `mcp` SDK, FastMCP) that lets Claude Desktop, Claude Code or any MCP client work with a company's operations data through ten typed, logged tools over contacts, deals, tasks, notes, inventory and sales orders, plus three resources and a briefing prompt. Built and tested on sample data by [Finamatik](https://finamatik.com/work/ops-mcp-server). The SQLite backend is one class (`backend.py`) and is the only thing to swap for a real CRM, ERP or project system.
 
 | Tool | Kind | Guardrail |
 |---|---|---|
