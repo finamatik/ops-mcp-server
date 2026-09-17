@@ -6,12 +6,12 @@
     "url": "https://github.com/finamatik/ops-mcp-server",
     "source": "github"
   },
-  "version": "0.1.0",
+  "version": "0.1.1",
   "packages": [
     {
       "registryType": "pypi",
       "identifier": "finamatik-ops-mcp",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "transport": { "type": "stdio" },
       "environmentVariables": [
         { "name": "OPS_MCP_READ_ONLY", "description": "Set to 1 to hide the write tools", "isRequired": false, "isSecret": false },

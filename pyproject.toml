@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "finamatik-ops-mcp"
-version = "0.1.0"
+version = "0.1.1"
 description = "MCP server with ten logged tools over contacts, deals, tasks, inventory and sales orders, with read only mode, dry run orders and an audit log. SQLite backend swappable for any CRM or ERP."
 readme = "README.md"
 license = { text = "MIT" }
