@@ -1,5 +1,5 @@
 """Ops MCP server, lets Claude (Desktop / Code / API) read and act on a company's operations data
-through a small set of typed, audited tools.
+through a small set of typed, logged tools.
 
   finamatik-ops-mcp                          # stdio transport (Claude Desktop / Claude Code / MCP Inspector)
   OPS_MCP_READ_ONLY=1 finamatik-ops-mcp      # read-only: write tools are not even registered
@@ -33,7 +33,7 @@ db = OpsBackend(DB_PATH)
 mcp = FastMCP(
     "ops-mcp",
     instructions=("Operations data for a field-services company: contacts, deals, tasks, notes, inventory and orders. "
-                  "Use search_contacts before get_contact. Write tools are audited; create_order previews by default (dry_run=true), "
+                  "Use search_contacts before get_contact. Write tools are logged; create_order previews by default (dry_run=true), "
                   "confirm with the user before calling it with dry_run=false." + (" THIS SESSION IS READ-ONLY." if READ_ONLY else "")),
 )
 
@@ -41,7 +41,7 @@ READ = ToolAnnotations(readOnlyHint=True, destructiveHint=False, idempotentHint=
 WRITE = ToolAnnotations(readOnlyHint=False, destructiveHint=False, idempotentHint=False, openWorldHint=False)
 
 
-def audited(fn):
+def logged(fn):
     """Every tool call then one JSON line: who/what/args/outcome/duration. Ship these to your SIEM or a Sheet."""
     @functools.wraps(fn)
     def wrapper(*a, **kw):
@@ -79,7 +79,7 @@ def _limit(n: int, cap: int = 50) -> int:
 
 # ------------------------------------------------------------------ read tools
 @mcp.tool(annotations=READ)
-@audited
+@logged
 def search_contacts(query: str, limit: int = 10) -> list[dict[str, Any]]:
     """Find contacts by name, company, email, phone or city (case-insensitive substring). Returns up to `limit` (max 50)."""
     if len(query.strip()) < 2:
@@ -88,7 +88,7 @@ def search_contacts(query: str, limit: int = 10) -> list[dict[str, Any]]:
 
 
 @mcp.tool(annotations=READ)
-@audited
+@logged
 def get_contact(contact_id: str) -> dict[str, Any]:
     """Full view of one contact: profile, deals, open tasks, last 5 notes, last 5 orders. Use the id from search_contacts (e.g. C-1007)."""
     c = db.get_contact(contact_id.strip().upper())
@@ -98,21 +98,21 @@ def get_contact(contact_id: str) -> dict[str, Any]:
 
 
 @mcp.tool(annotations=READ)
-@audited
+@logged
 def list_tasks(status: Literal["open", "done", "all"] = "open", assignee: Optional[str] = None, due_before: Optional[str] = None, limit: int = 25) -> list[dict[str, Any]]:
     """List tasks, default open ones, optionally filtered by assignee (hamza|sana|ali) and due date (YYYY-MM-DD). Sorted by due date."""
     return db.list_tasks(status, assignee, _iso_date(due_before, "due_before") if due_before else None, _limit(limit))
 
 
 @mcp.tool(annotations=READ)
-@audited
+@logged
 def check_inventory(sku: Optional[str] = None, low_stock_only: bool = False) -> list[dict[str, Any]]:
     """Stock levels. Pass a SKU for one item, or low_stock_only=true for items at/below their reorder level."""
     return db.inventory(sku.strip().upper() if sku else None, low_stock_only)
 
 
 @mcp.tool(annotations=READ)
-@audited
+@logged
 def pipeline_summary() -> dict[str, Any]:
     """Deals by stage (count + AED value), open pipeline total, and open deals expected to close in the next 30 days."""
     return db.pipeline_summary()
@@ -121,7 +121,7 @@ def pipeline_summary() -> dict[str, Any]:
 # ------------------------------------------------------------------ write tools (not registered in read-only mode)
 if not READ_ONLY:
     @mcp.tool(annotations=WRITE)
-    @audited
+    @logged
     def add_note(contact_id: str, text: str) -> dict[str, Any]:
         """Append a timestamped note to a contact's timeline (max 2,000 characters)."""
         if not text.strip() or len(text) > 2000:
@@ -129,7 +129,7 @@ if not READ_ONLY:
         return db.add_note(contact_id.strip().upper(), text.strip())
 
     @mcp.tool(annotations=WRITE)
-    @audited
+    @logged
     def create_task(contact_id: str, title: str, due_date: str, assignee: Literal["hamza", "sana", "ali"]) -> dict[str, Any]:
         """Create an open task for a contact. due_date is YYYY-MM-DD and may not be in the past."""
         d = _iso_date(due_date, "due_date")
@@ -140,19 +140,19 @@ if not READ_ONLY:
         return db.create_task(contact_id.strip().upper(), title.strip(), d, assignee)
 
     @mcp.tool(annotations=ToolAnnotations(readOnlyHint=False, destructiveHint=False, idempotentHint=True, openWorldHint=False))
-    @audited
+    @logged
     def complete_task(task_id: str) -> dict[str, Any]:
         """Mark a task done (idempotent)."""
         return db.complete_task(task_id.strip().upper())
 
     @mcp.tool(annotations=WRITE)
-    @audited
+    @logged
     def update_deal_stage(deal_id: str, stage: Literal["new", "qualified", "proposal", "negotiation", "won", "lost"]) -> dict[str, Any]:
         """Move a deal to a new pipeline stage."""
         return db.update_deal_stage(deal_id.strip().upper(), stage)
 
     @mcp.tool(annotations=WRITE)
-    @audited
+    @logged
     def create_order(contact_id: str, sku: str, qty: int, dry_run: bool = True) -> dict[str, Any]:
         """Place a sales order for a contact. Checks stock first. dry_run=true (default) only returns a priced preview ,
         confirm with the user, then call again with dry_run=false to commit and decrement inventory."""
@@ -168,7 +168,7 @@ def schema() -> str:
                        "tasks": "T-####, status open|done, due_date, assignee", "notes": "N-####, free text on a contact",
                        "inventory": "SKU, qty, reorder_level (low stock when qty <= reorder_level), unit_price_aed, supplier",
                        "orders": "SO-####, sku, qty, total_aed, status confirmed|shipped|delivered",
-                       "mode": "read-only" if READ_ONLY else "read-write (writes audited)"}, indent=1)
+                       "mode": "read-only" if READ_ONLY else "read-write (writes logged)"}, indent=1)
 
 
 @mcp.resource("ops://inventory/low-stock")
