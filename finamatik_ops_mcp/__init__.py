@@ -3,4 +3,4 @@
 Built and tested on sample data by Finamatik Business Solutions. https://finamatik.com/work/ops-mcp-server
 """
 
-__version__ = "0.1.0"
+__version__ = "0.1.1"
