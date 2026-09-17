@@ -1,7 +1,7 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-09-29/server.schema.json",
   "name": "io.github.finamatik/ops-mcp-server",
-  "description": "Ten audited tools over contacts, deals, tasks, inventory and sales orders, with read only mode, dry run orders and an audit log. SQLite backend swappable for any CRM or ERP.",
+  "description": "Ten logged tools over contacts, deals, tasks, inventory and sales orders, with read only mode, dry run orders and an audit log. SQLite backend swappable for any CRM or ERP.",
   "repository": {
     "url": "https://github.com/finamatik/ops-mcp-server",
     "source": "github"
